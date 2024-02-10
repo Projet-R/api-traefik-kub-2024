@@ -1,6 +1,6 @@
 on:
   push:
-    branches: [ main ]
+    branches: [main]
 
 name: Deploy New Version App FastApi
 
@@ -10,38 +10,38 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout
-      uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v3
 
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: ${{ vars.AWS_DEFAULT_REGION }}
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_DEFAULT_REGION }}
 
-    - name: Login to Amazon ECR
-      id: login-ecr
-      uses: aws-actions/amazon-ecr-login@v1
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
 
-    - name: Get Short GitHub SHA and Save in Environment Variable
-      run: echo "SHORT_GITHUB_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+      - name: Get Short GitHub SHA and Save in Environment Variable
+        run: echo "SHORT_GITHUB_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
 
-    - name: Build, tag, and push the image to Amazon ECR
-      id: build-image
-      env:
-        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        ECR_REPOSITORY: ${{ secrets.REPO_NAME }}
-        IMAGE_TAG: latest
-      run: |
-        echo "Building Docker image..."
-        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY:$SHORT_GITHUB_SHA . 
-        echo "Docker image built successfully."
-    
-        echo "Pushing Docker image to ECR..."
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY --all-tags
-        echo "Docker image pushed successfully."
-    
+      - name: Build, tag, and push the image to Amazon ECR
+        id: build-image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{ secrets.REPO_NAME }}
+          IMAGE_TAG: latest
+        run: |
+          echo "Building Docker image..."
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY:$SHORT_GITHUB_SHA . 
+          echo "Docker image built successfully."
+      
+          echo "Pushing Docker image to ECR..."
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY --all-tags
+          echo "Docker image pushed successfully."
+
   deploy_dev:
     name: deploy_dev
     needs: [build]
@@ -51,27 +51,25 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: ${{ vars.AWS_DEFAULT_REGION }}
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_DEFAULT_REGION }}
         
-    - name: Update kube config
-      run: aws eks update-kubeconfig --name ${{ vars.EKS_CLUSTER_NAME }} --region ${{ vars.AWS_DEFAULT_REGION }}
+      - name: Update kube config
+        run: aws eks update-kubeconfig --name ${{ secrets.EKS_CLUSTER_NAME }} --region ${{ secrets.AWS_DEFAULT_REGION }}
 
-    - name: Clone charts HELM
-      run: |
-        git clone https://github.com/Datascientest-DevOps-2024/helm-chart-db.git
-        git clone https://github.com/Datascientest-DevOps-2024/helm-chart-fastapi.git
+      - name: Clone charts HELM
+        run: |
+          git clone https://github.com/Datascientest-DevOps-2024/helm-chart-db.git
+          git clone https://github.com/Datascientest-DevOps-2024/helm-chart-fastapi.git
       
-    - name: Install Charts db and Fastapi - dev
-      run: |
-        
-        helm upgrade --install db ./helm-chart-db --values=helm-chart-db/values.yaml --namespace dev
-        helm upgrade --install fastapi ./helm-chart-fastapi --values=helm-chart-fastapi/values_dev.yaml --namespace dev
+      - name: Install Charts db and Fastapi - dev
+        run: |
+          helm upgrade --install db ./helm-chart-db --values=helm-chart-db/values.yaml --namespace dev
+          helm upgrade --install fastapi ./helm-chart-fastapi --values=helm-chart-fastapi/values_dev.yaml --namespace dev
   
   deploy_prod:
     name: deploy_prod
@@ -82,25 +80,35 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: ${{ vars.AWS_DEFAULT_REGION }}
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_DEFAULT_REGION }}
         
-    - name: Update kube config
-      run: aws eks update-kubeconfig --name ${{ vars.EKS_CLUSTER_NAME }} --region ${{ vars.AWS_DEFAULT_REGION }}
+      - name: Update kube config
+        run: aws eks update-kubeconfig --name ${{ secrets.EKS_CLUSTER_NAME }} --region ${{ secrets.AWS_DEFAULT_REGION }}
 
-    - name: Clone charts HELM
-      run: |
-        git clone https://github.com/Datascientest-DevOps-2024/helm-chart-db.git
-        git clone https://github.com/Datascientest-DevOps-2024/helm-chart-fastapi.git
+      - name: Clone charts HELM
+        run: |
+          git clone https://github.com/Datascientest-DevOps-2024/helm-chart-db.git
+          git clone https://github.com/Datascientest-DevOps-2024/helm-chart-fastapi.git
 
-    - name: Install Charts db and Fastapi - prod
-      run: |
-        helm upgrade --install db ./helm-chart-db --values=helm-chart-db/values.yaml --namespace prod
-        helm upgrade --install fastapi ./helm-chart-fastapi --values=helm-chart-fastapi/values.yaml --namespace prod
-        
-        
+      - name: Install Charts db and Fastapi - prod
+        run: |
+          helm upgrade --install db ./helm-chart-db --values=helm-chart-db/values.yaml --namespace prod
+          helm upgrade --install fastapi ./helm-chart-fastapi --values=helm-chart-fastapi/values.yaml --namespace prod
+      
+      - name: Check if Velero is installed
+        id: check_velero
+        run: |
+          kubectl get namespace velero >/dev/null 2>&1 || echo "::set-output name=velero_installed::false"
+          echo "::set-output name=velero_installed::true"
+        continue-on-error: true
+      
+      - name: Install Velero if not already installed
+        if: steps.check_velero.outputs.velero_installed != 'true'
+        run: |
+          helm repo add vmware-tanzu https://vmware-tanzu.github.io/helm-charts
+          helm install velero vmware-tanzu/velero --namespace velero --create-namespace
