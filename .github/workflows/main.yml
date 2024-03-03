@@ -33,7 +33,7 @@ jobs:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         ECR_REPOSITORY: ${{ secrets.REPO_NAME }}
         IMAGE_TAG: latest
-      run: |
+      run: | 
         echo "Building Docker image..."
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY:$SHORT_GITHUB_SHA . 
         echo "Docker image built successfully."
@@ -66,6 +66,10 @@ jobs:
       run: |
         git clone https://github.com/Datascientest-DevOps-2024/helm-chart-db.git
         git clone https://github.com/Datascientest-DevOps-2024/helm-chart-fastapi.git
+
+    - name: Create namespace dev
+      run: kubectl create namespace dev
+
       
     - name: Install Charts db and Fastapi - dev
       run: |
