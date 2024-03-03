@@ -102,6 +102,10 @@ jobs:
         git clone https://github.com/Datascientest-DevOps-2024/helm-chart-db.git
         git clone https://github.com/Datascientest-DevOps-2024/helm-chart-fastapi.git
 
+        
+    - name: Create namespace dev
+      run: kubectl create namespace dev
+  
     - name: Install Charts db and Fastapi - prod
       run: |
         helm upgrade --install db ./helm-chart-db --values=helm-chart-db/values.yaml --namespace prod
