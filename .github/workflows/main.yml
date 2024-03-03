@@ -60,7 +60,7 @@ deploy_dev:
         else
           echo "::set-output name=namespace_dev_exists::false"
         fi
-
+ 
     - name: Create namespace dev if not present
       if: steps.check_dev_namespace.outputs.namespace_dev_exists == 'false'
       run: kubectl create namespace dev
