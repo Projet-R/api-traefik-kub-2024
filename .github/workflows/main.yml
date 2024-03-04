@@ -73,6 +73,7 @@ jobs:
         helm upgrade --install db ./helm-chart-db --values=helm-chart-db/values.yaml --namespace dev
         helm upgrade --install fastapi ./helm-chart-fastapi --values=helm-chart-fastapi/values_dev.yaml --namespace dev
   
+  
   deploy_prod:
     name: deploy_prod
     needs: [deploy_dev]
@@ -82,35 +83,25 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Check if namespace prod exists
-        id: check_prod_namespace
-        run: |
-          if kubectl get namespace prod &> /dev/null; then
-            echo "::set-output name=namespace_prod_exists::true"
-          else
-            echo "::set-output name=namespace_prod_exists::false"
-          fi
+    
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ vars.AWS_DEFAULT_REGION }}
+        
+    - name: Update kube config
+      run: aws eks update-kubeconfig --name ${{ vars.EKS_CLUSTER_NAME }} --region ${{ vars.AWS_DEFAULT_REGION }}
 
-      - name: Create namespace prod if not present
-        if: steps.check_prod_namespace.outputs.namespace_prod_exists == 'false'
-        run: kubectl create namespace prod
+    - name: Clone charts HELM
+      run: |
+        git clone https://github.com/Datascientest-DevOps-2024/helm-chart-db.git
+        git clone https://github.com/Datascientest-DevOps-2024/helm-chart-fastapi.git
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_DEFAULT_REGION }}
-          
-      - name: Update kube config
-        run: aws eks update-kubeconfig --name ${{ secrets.EKS_CLUSTER_NAME }} --region ${{ secrets.AWS_DEFAULT_REGION }}
-
-      - name: Clone charts HELM
-        run: |
-          git clone https://github.com/Datascientest-DevOps-2024/helm-chart-db.git
-          git clone https://github.com/Datascientest-DevOps-2024/helm-chart-fastapi.git
-
-      - name: Install Charts db and Fastapi - prod
-        run: |
-          helm upgrade --install db ./helm-chart-db --values=helm-chart-db/values.yaml --namespace prod
-          helm upgrade --install fastapi ./helm-chart-fastapi --values=helm-chart-fastapi/values.yaml --namespace prod
+    - name: Install Charts db and Fastapi - prod
+      run: |
+        helm upgrade --install db ./helm-chart-db --values=helm-chart-db/values.yaml --namespace prod
+        helm upgrade --install fastapi ./helm-chart-fastapi --values=helm-chart-fastapi/values.yaml --namespace prod
+        
+        
