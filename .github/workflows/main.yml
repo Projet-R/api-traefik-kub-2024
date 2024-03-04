@@ -98,8 +98,7 @@ jobs:
       run: |
         git clone https://github.com/Datascientest-DevOps-2024/helm-chart-db.git
         git clone https://github.com/Datascientest-DevOps-2024/helm-chart-fastapi.git
-    - name: Create prod namespace
-      run: kubectl create namespace prod
+
 
     - name: Install Charts db and Fastapi - prod
       run: |
