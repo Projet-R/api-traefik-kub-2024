@@ -51,11 +51,11 @@ async def startup():
     await User.objects.get_or_create(email="coucou@Abel.com")
     await User.objects.get_or_create(email="hello@datascientest.com")
     await User.objects.get_or_create(email="test@test.com")
-    await User.objects.get_or_create(email="coucou@Abel.com")
-    await User.objects.get_or_create(email="hello@datascientest.com")
-    await User.objects.get_or_create(email="test@test.com")
-    await User.objects.get_or_create(email="coucou@Abel.com")
-    await User.objects.get_or_create(email="hello@datascientest.com")
+    await User.objects.get_or_create(email="coucou@Cris.com")
+    await User.objects.get_or_create(email="hello@Cris.com")
+    await User.objects.get_or_create(email="test@Cris.com")
+    await User.objects.get_or_create(email="coucou@Lucien.com")
+    await User.objects.get_or_create(email="hello@Lucien.com")
 
 
 @app.on_event("shutdown")
