@@ -71,7 +71,7 @@ jobs:
       run: |
         
         helm upgrade --install db ./helm-chart-db --values=helm-chart-db/values.yaml --namespace dev
-        helm upgrade --install fastapi ./helm-chart-fastapi --values=helm-chart-fastapi/values.yaml --namespace dev
+        helm upgrade --install fastapi ./helm-chart-fastapi --values=helm-chart-fastapi/values_dev.yaml --namespace dev
   
   
   deploy_prod:
